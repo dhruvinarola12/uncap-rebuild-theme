@@ -1,0 +1,307 @@
+{{- 'review-slide-show.css' | asset_url | stylesheet_tag -}}
+
+{%- liquid
+    assign section_bg_color = section.settings.background-color
+    assign video_bg_image = section.settings.image
+    assign video_hosted = section.settings.video_hosted
+    assign before_image = section.settings.before_image
+    assign after_image = section.settings.after_image
+
+    assign sizes = '320x320,640x640,960x960,1280x1280'
+-%}
+<div class="ssb-review-wrapp" style="--bg-color:{{ section_bg_color }}">
+  <div class="ssb-review-inn ssb-review-inn-slider">
+    <div class="ssb-review-slider-wrapp">
+      {% if before_image != blank %}
+        {%- liquid
+          assign sizes = before_image.width | append: 'x' | append: before_image.height
+        -%}
+        <div class="ssb-review-bgicon icon-bg-before">{%- render 'responsive-image', image: before_image, sizes: sizes -%}</div>
+      {% endif %}
+      <div class="ssb-review-slider-inn">        
+        <slide-show class="ssb-review-carousel carousel row" data-overlayscrollbars-initialize data-dots="true">
+          {% if section.blocks.size > 0 %}
+            {% for block in section.blocks %} 
+              {%- liquid
+                  assign star_limit = block.settings.star_limit
+                  assign review_title = block.settings.review-title
+                  assign review_desc = block.settings.review-desk
+                  assign review_author = block.settings.review-author
+                  assign review_purchase = block.settings.purchase-prod
+              	  assign section_label = block.settings.review-label                  
+              -%}
+              <div class="carousel__slide ssb-review-slide-wrapp">
+                  {% if block.type == "review" %}
+                    <div class="ssb-review-slide-inn">
+                    <div class="ssb-review-slider-label">{{ section_label }}</div>
+                    <div class="rating_star">
+                      {% for i in (1..star_limit) %}
+                        <span>{% render 'svg-icons' with 'icon-star' %}</span>
+                      {% endfor %}
+                    </div>
+                    {%- if review_title != blank or review_desc != blank -%}
+                      <div class="review-content-wrapp">
+                        {%- if review_title != blank -%}
+                          <div class="title-review">{{ review_title }}</div>
+                        {%- endif -%}
+                        {%- if review_desc != blank -%}
+                          <div class="review-content-inn">{{ review_desc }}</div>
+                        {%- endif -%}
+                       </div>
+                     {%- endif -%}
+                     {%- if review_author != blank or review_purchase != blank -%}
+                        <div class="review-footer-wrapp">
+                          <div class="review-author">{{ review_author }}</div>
+                          <div class="review-purchase"><span>Purchased: </span>{{ review_purchase.title | link_to: review_purchase.url }}</div>
+                        </div>
+                     {%- endif -%}
+                   </div>
+                   {% elsif block.type == "opportunities-slide" %} 
+                      {% liquid
+                        assign sub_title = block.settings.sub-title
+                        assign title = block.settings.title
+                        assign content = block.settings.content
+                        assign button_label = block.settings.button_label
+                        assign button_url = block.settings.button_url
+                      %}
+                     <div class="opportunities-slide">
+                       {% if sub_title != blank %} <div class="sub-title ssb-review-slider-label"><p>{{ sub_title }}</p></div> {% endif %}
+                       {% if title != blank %}<div class="block-title"><h2 class="h2">{{ title }}</h2></div> {% endif %}
+                       {% if content != blank %}<div class="content-wrapper">{{ content }}</div> {% endif %}
+                       {% if button_label != blank %}
+                         <a href="{{ button_url }}" class="button">{{ button_label }}</a>    
+                       {% endif %}
+                     </div>
+                   {% endif %}
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% if section.blocks.size > 1 %}
+            <div class="theme-scroll-nav-wrapp">
+              <div class="flickity-custom-navigation-wrapper">
+                <div class="flickity-custom-navigation">
+                  <div class="flickity-nav flickity-prev" tabindex="0">{%- render 'svg-icons' with 'carousel-prev' -%}</div>
+                    <ol class="flickity-custom-navigation--dots flickity-page-dots">
+                      {%- for block in section.blocks -%}
+                        <li class="dot" aria-label="{{ forloop.index }}"></li>
+                      {%- endfor -%}
+                    </ol>
+                  <div class="flickity-nav flickity-next" tabindex="0">{%- render 'svg-icons' with 'carousel-next' -%}</div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </slide-show>
+      </div>
+      {% if after_image != blank %}
+        {%- liquid
+          assign sizes = after_image.width | append: 'x' | append: after_image.height
+        -%}
+        <div class="ssb-review-bgicon icon-bg-after">{%- render 'responsive-image', image: after_image, sizes: sizes -%}</div>
+      {% endif %}
+    </div>
+    <div class="ssb-review-videobanner play-videobanner">
+      <slide-show class="ssb-review-videoimg-slider carousel row" data-overlayscrollbars-initialize data-dots="false">
+        {% for block in section.blocks %}
+          {%- liquid 
+              assign video_bg_image = block.settings.image
+              assign video_hosted = block.settings.video_hosted
+          -%}
+          <div class="ssb-videoimg-slide carousel__slide">
+            {%- if video_hosted != blank -%}
+            <div class="ssb-video--btnmute">
+              <div class="ssb-btn-mute mute-toggle" onclick="toggleMuteVideo(this)">{%- render 'svg-icons' with 'btn-mute' -%}</div>
+            </div>
+            {%- endif -%}
+            <div class="ssb-review--videoinn">
+              {%- if video_hosted != blank -%}
+                {%- liquid
+                  assign autoplay = false
+                -%}
+                <div class="ssb-video-wrapp">
+                  {% comment %} <div class="ssb-video-bg" data-provider="hosted" data-video-id="{{ video_hosted.id }}">
+                    {{ video_hosted | video_tag: autoplay: autoplay, loop: true, controls: false, muted: true }}
+                  </div> {% endcomment %}
+                  <div class="ssb-video-bg" data-provider="hosted" data-video-id="{{ video_hosted.id }}" >
+                    <video {% if autoplay %}  autoplay  {% endif %}   loop   muted  playsinline preload="none"  poster="{{ video_hosted.preview_image | image_url: width: 1200 }}"  >
+                      {%- for source in video_hosted.sources -%}
+                        <source
+                          src="{{ source.url }}"
+                          type="{{ source.mime_type }}"
+                        >
+                      {%- endfor -%}
+                      <img src="{{ video_hosted.preview_image | image_url: width: 1200 }}" alt="{{ block.settings.heading | escape }}" loading="lazy" width="{{ video_hosted.preview_image.width }}" height="{{ video_hosted.preview_image.height }}" >
+                    </video>
+                  </div>
+                </div>
+              {%- else -%}
+                {%- if video_bg_image -%}
+                  {%- render 'responsive-image', image: video_bg_image | image_url -%}
+                {%- else -%}
+                  <div class="thb-placeholder">{{ 'hero-apparel-1' | placeholder_svg_tag }}</div>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+          </div>
+        {% endfor %}
+      </slide-show>
+    </div>
+  </div>
+</div>
+{% comment %} {{ 'slideshow-vendor.js' | asset_url | script_tag }} {% endcomment %}
+<script src="{{ 'slideshow-vendor.js' | asset_url }}" defer></script>
+<script src="{{ 'slideshow.js' | asset_url }}" defer></script>
+{% schema %}
+  {
+    "name": "Review Slide Show",
+	"class": "review-slide-show",
+    "settings": [
+      {
+        "type":"color",
+        "id":"background-color",
+        "label":"Background Color"
+      },
+      {
+        "type":"image_picker",
+        "id":"image",
+        "label":"Image"
+      },
+      {
+        "type": "video",
+        "id": "video_hosted",
+        "label": "Shopify-hosted video",
+        "info": "Overrides the Video URL setting."
+      },
+      {
+        "type": "header",
+        "content": "Reviews"
+      },      
+      {
+        "type":"image_picker",
+        "id":"before_image",
+        "label":"Before Image"
+      },
+      {
+        "type":"image_picker",
+        "id":"after_image",
+        "label":"After Image"
+      },
+      {
+        "type": "header",
+        "content": "Spacing"
+      },
+      {
+        "type": "checkbox",
+        "id": "disable_top_spacing",
+        "default": false,
+        "label": "Remove top spacing"
+      },
+      {
+        "type": "checkbox",
+        "id": "disable_bottom_spacing",
+        "default": false,
+        "label": "Remove bottom spacing"
+      }
+    ],
+    "blocks":[
+      {
+        "type":"review",
+        "name":"Review",
+        "settings":[
+          {
+            "type":"text",
+            "id":"review-label",
+            "label":"label"
+          },
+          {
+            "type": "range",
+            "id": "star_limit",
+            "min": 1,
+            "max": 5,
+            "step": 1,            
+            "label": "Star",
+            "default": 2
+          },
+          {
+            "type":"text",
+            "id":"review-title",
+            "label":"Heading"
+          },
+          {
+            "type":"richtext",
+            "id":"review-desk",
+            "label":"Review Content"
+          },
+          {
+            "type":"text",
+            "id":"review-author",
+            "label":"Author"
+          },
+          {
+            "type":"product",
+            "id":"purchase-prod",
+            "label":"Purchase Product"
+          },
+          {
+            "type":"image_picker",
+            "id":"image",
+            "label":"Image"
+          },
+          {
+            "type": "video",
+            "id": "video_hosted",
+            "label": "Shopify-hosted video",
+            "info": "Overrides the Video URL setting."
+          }
+        ]
+      },
+      {
+        "type": "opportunities-slide",
+        "name": "opportunities slide",
+        "settings": [
+          {
+            "type": "text",
+            "id": "sub-title",
+            "label": "Sub Title"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title"
+          },
+          {
+            "type": "richtext",
+            "id": "content",
+            "label": "Content"
+          },
+          {
+            "type": "text",
+            "id": "button_label",
+            "label": "Button Label"
+          },
+          {
+            "type": "url",
+            "id": "button_url",
+            "label": "Button Url"
+          },
+          {
+            "type":"image_picker",
+            "id":"image",
+            "label":"Image"
+          },
+          {
+            "type": "video",
+            "id": "video_hosted",
+            "label": "Shopify-hosted video",
+            "info": "Overrides the Video URL setting."
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Review Slide Show"
+      }
+    ]
+  }
+{% endschema %}
