@@ -136,7 +136,7 @@
                 </div>
               {%- else -%}
                 {%- if video_bg_image -%}
-                  {%- render 'responsive-image', image: video_bg_image | image_url -%}
+                  {%- render 'responsive-image', image: video_bg_image -%}
                 {%- else -%}
                   <div class="thb-placeholder">{{ 'hero-apparel-1' | placeholder_svg_tag }}</div>
                 {%- endif -%}
